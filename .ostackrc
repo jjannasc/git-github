@@ -1,0 +1,42 @@
+# Source this file to set the OTC Config
+#######################################################################
+# workplace user: OS_USERNAME = "14XXXXXX OTC0000000000100XXXXXXX"
+# IAM user: 	  OS_USERNAME = "XXXXXXXX"
+#######################################################################
+#
+export OS_USERNAME=""
+export OS_USER_DOMAIN_NAME=OTC0000000000100XXXXXX
+#
+# Your IAMv2 password (or Generated API key) -- keep this file private (chmod 0600)!
+export OS_PASSWORD=GeneratedAPIKEY
+# Only change these for a different region
+export OS_TENANT_NAME=eu-de
+export OS_PROJECT_NAME=eu-de
+export OS_AUTH_URL=https://iam.eu-de.otc.t-systems.com:443/v3
+# No longer recommended (nor needed):
+#export OS_CACERT=/etc/ssl/OTC-API-GW-CA-Bundle.pem
+# No changes needed beyond this point
+export NOVA_ENDPOINT_TYPE=publicURL
+export OS_ENDPOINT_TYPE=publicURL
+export CINDER_ENDPOINT_TYPE=publicURL
+export OS_VOLUME_API_VERSION=2
+export OS_IDENTITY_API_VERSION=3
+export OS_IMAGE_API_VERSION=2
+# Optional part:
+# Set S3 credentials from ~/credentials.csv if it exists and not set already
+if test -z "$S3_ACCESS_KEY_ID" -a -e ~/credentials.csv; then
+  PERM=$(stat -Lc "%a" ~/credentials.csv)
+  if test "${PERM:2:1}" != "0"; then
+    echo "Warning: ~/credentials.csv permissions too open ($PERM)"
+  fi
+  CRED=`cat ~/credentials.csv | tail -n1 | tr -d '"'`
+  CRED_USR=${CRED%%,*}
+  if test "$CRED_USR" != "$OS_USERNAME"; then
+    echo "Warning: OpenStack Env set for \"$OS_USERNAME\"; not configuring ObjStorage for \"$CRED_USR\""
+  else
+    CRED=${CRED#*,}
+    export S3_HOSTNAME=obs.eu-de.otc.t-systems.com
+    export S3_ACCESS_KEY_ID=${CRED%,*}
+    export S3_SECRET_ACCESS_KEY=${CRED#*,}
+  fi
+fi
